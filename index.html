@@ -99,7 +99,8 @@ button:disabled{opacity:.4;cursor:not-allowed}
     return;
   }
 
-  var cached = sessionStorage.getItem('__doc');
+  var CK = '__doc_' + P.d.slice(0, 12);
+  var cached = sessionStorage.getItem(CK);
   if (cached) { render(cached); return; }
 
   pwd.focus();
@@ -152,7 +153,13 @@ button:disabled{opacity:.4;cursor:not-allowed}
       })
       .then(function(buf){
         var html = new TextDecoder().decode(buf);
-        try { sessionStorage.setItem('__doc', html); } catch(err){}
+        try {
+          for (var k = sessionStorage.length - 1; k >= 0; k--) {
+            var kk = sessionStorage.key(k);
+            if (kk && kk.indexOf('__doc') === 0 && kk !== CK) sessionStorage.removeItem(kk);
+          }
+          sessionStorage.setItem(CK, html);
+        } catch(e){}
         load.classList.add('on');
         render(html);
       })
