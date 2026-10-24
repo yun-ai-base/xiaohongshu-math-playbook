@@ -129,11 +129,34 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
   function render(html){
     try {
-      document.open();
-      document.write(html);
-      document.close();
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+
+      document.title = doc.title || document.title;
+      document.documentElement.lang = doc.documentElement.lang || 'zh-CN';
+
+      var oldStyles = document.head.querySelectorAll('style');
+      for (var i = 0; i < oldStyles.length; i++) oldStyles[i].remove();
+
+      var newStyles = doc.head.querySelectorAll('style');
+      for (var j = 0; j < newStyles.length; j++) {
+        var st = document.createElement('style');
+        st.textContent = newStyles[j].textContent;
+        document.head.appendChild(st);
+      }
+
+      document.body.className = doc.body.className || '';
+      document.body.removeAttribute('style');
+      document.body.innerHTML = doc.body.innerHTML;
+
+      var scripts = doc.body.querySelectorAll('script');
+      for (var k = 0; k < scripts.length; k++) {
+        var sc = document.createElement('script');
+        if (scripts[k].src) sc.src = scripts[k].src;
+        else sc.textContent = scripts[k].textContent;
+        document.body.appendChild(sc);
+      }
     } catch(e) {
-      document.body.innerHTML = '<p style="font:14px sans-serif;color:#AE322C;text-align:center">渲染失败，请刷新重试</p>';
+      document.body.innerHTML = '<p style="font:14px sans-serif;color:#AE322C;text-align:center;padding:48px">渲染失败，请刷新重试</p>';
     }
   }
 
